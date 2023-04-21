@@ -88,9 +88,13 @@ const addUser = function (user) {
 
 const getAllReservations = function (guest_id, limit = 10) {
   const queryString = `
-    SELECT *
+    SELECT reservations.*, properties.*, users.name AS owner_name
     FROM reservations
-    WHERE guest_id = $1
+    JOIN properties ON reservations.property_id = properties.id
+    JOIN users ON properties.owner_id = users.id
+    WHERE reservations.guest_id = $1
+    AND end_date < NOW()::date
+    ORDER BY start_date
     LIMIT $2;
   `;
   const queryParams = [guest_id, limit];
@@ -103,6 +107,7 @@ const getAllReservations = function (guest_id, limit = 10) {
       console.log(err.message);
     });
 };
+
 
 /// Properties
 
