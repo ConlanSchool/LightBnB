@@ -1,29 +1,28 @@
-const { Pool } = require('pg');
+// Import the 'pg' library
+const { Pool } = require("pg");
 
+// Create a new connection pool with the database
 const pool = new Pool({
-  user: 'labber',
-  password: '123',
-  host: 'localhost',
-  database: 'lightbnb'
+  user: "labber",
+  password: "123",
+  host: "localhost",
+  database: "lightbnb",
 });
 
-/**
- * Get a single user from the database given their email.
- * @param {String} email The email of the user.
- * @return {Promise<{}>} A promise to the user.
- */
-
+// Get a user with a given email
 const getUserWithEmail = function (email) {
+  // Define the SQL query
   const queryString = `
     SELECT *
     FROM users
     WHERE email = $1;
   `;
   const queryParams = [email];
+
+  // Execute the query and return the first row in the result
   return pool
     .query(queryString, queryParams)
     .then((result) => {
-      console.log('Query result:', result); // Add this line to see the result of the query
       return result.rows[0];
     })
     .catch((err) => {
@@ -31,20 +30,17 @@ const getUserWithEmail = function (email) {
     });
 };
 
-
-/**
- * Get a single user from the database given their id.
- * @param {string} id The id of the user.
- * @return {Promise<{}>} A promise to the user.
- */
-
+// Get a user with a given id
 const getUserWithId = function (id) {
+  // Define the SQL query
   const queryString = `
     SELECT *
     FROM users
     WHERE id = $1;
   `;
   const queryParams = [id];
+
+  // Execute the query and return the first row in the result
   return pool
     .query(queryString, queryParams)
     .then((result) => {
@@ -55,18 +51,17 @@ const getUserWithId = function (id) {
     });
 };
 
-/**
- * Add a new user to the database.
- * @param {{name: string, password: string, email: string}} user
- * @return {Promise<{}>} A promise to the user.
- */
+// Add a new user to the database
 const addUser = function (user) {
+  // Define the SQL
   const queryString = `
     INSERT INTO users (name, email, password)
     VALUES ($1, $2, $3)
     RETURNING *;
   `;
   const queryParams = [user.name, user.email, user.password];
+
+  // Execute the query and return the inserted row
   return pool
     .query(queryString, queryParams)
     .then((result) => {
@@ -77,16 +72,9 @@ const addUser = function (user) {
     });
 };
 
-
-/// Reservations
-
-/**
- * Get all reservations for a single user.
- * @param {string} guest_id The id of the user.
- * @return {Promise<[{}]>} A promise to the reservations.
- */
-
+// Get all reservations for a given guest_id, with a default limit of 10
 const getAllReservations = function (guest_id, limit = 10) {
+  // Define the SQL query
   const queryString = `
     SELECT reservations.*, properties.*, users.name AS owner_name
     FROM reservations
@@ -98,6 +86,8 @@ const getAllReservations = function (guest_id, limit = 10) {
     LIMIT $2;
   `;
   const queryParams = [guest_id, limit];
+
+  // Execute the query and return the result rows
   return pool
     .query(queryString, queryParams)
     .then((result) => {
@@ -108,15 +98,7 @@ const getAllReservations = function (guest_id, limit = 10) {
     });
 };
 
-
-/// Properties
-
-/**
- * Get all properties.
- * @param {{}} options An object containing query options.
- * @param {*} limit The number of results to return.
- * @return {Promise<[{}]>}  A promise to the properties.
- */
+// Get all properties based on provided options, with a limit of 10
 const getAllProperties = function (options, limit = 10) {
   const queryParams = [];
   let queryString = `
@@ -170,7 +152,8 @@ const getAllProperties = function (options, limit = 10) {
     ORDER BY cost_per_night
     LIMIT $${queryParams.length};
   `;
-  return pool.query(queryString, queryParams)
+  return pool
+    .query(queryString, queryParams)
     .then((result) => {
       return result.rows;
     })
@@ -179,13 +162,7 @@ const getAllProperties = function (options, limit = 10) {
     });
 };
 
-
-
-/**
- * Add a property to the database
- * @param {{}} property An object containing all of the property details.
- * @return {Promise<{}>} A promise to the property.
- */
+// Define the SQL
 const addProperty = function (property) {
   const queryString = `
     INSERT INTO properties (owner_id, title, description, thumbnail_photo_url, cover_photo_url, cost_per_night, street, city, province, post_code, country, parking_spaces, number_of_bathrooms, number_of_bedrooms)
@@ -206,8 +183,10 @@ const addProperty = function (property) {
     property.country,
     property.parking_spaces,
     property.number_of_bathrooms,
-    property.number_of_bedrooms
+    property.number_of_bedrooms,
   ];
+
+  // Execute the query and return the inserted row
   return pool
     .query(queryString, queryParams)
     .then((result) => {
@@ -218,7 +197,6 @@ const addProperty = function (property) {
     });
 };
 
-
 module.exports = {
   getUserWithEmail,
   getUserWithId,
@@ -227,4 +205,3 @@ module.exports = {
   getAllProperties,
   addProperty,
 };
-

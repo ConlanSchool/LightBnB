@@ -21,7 +21,7 @@ router.post("/", (req, res) => {
     .catch((e) => res.send(e));
 });
 
-// Log a user in
+// Login
 router.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -50,7 +50,7 @@ router.post("/login", (req, res) => {
 });
 
 
-// Log a user out
+// Logout
 router.post("/logout", (req, res) => {
   req.session.userId = null;
   res.send({});
